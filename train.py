@@ -8,8 +8,9 @@ Implementation of the paper:
 This file trains a baseline model using full supervision.
 '''
 
-from __future__ import print_function
 import argparse
+import hydra
+import time
 from math import log10
 
 from PIL import Image
@@ -42,30 +43,29 @@ opt = parser.parse_args()
 
 print(opt)
 
-if opt.cuda and not torch.cuda.is_available():
-    raise Exception("No GPU found, please run without --cuda")
+@hydra.main(config_path='./configs', config_name='config.yaml')
+def train(cfg: DictConfig):
+    if cfg.Training.gpu_ids and not torch.cuda.is_available():
+        raise Exception("No GPU found, please run without --cuda")
 
-torch.manual_seed(opt.seed)
+    torch.manual_seed(cfg.Training.seed)
 
-device = torch.device("cuda" if opt.cuda else "cpu")
+    device = torch.device("cuda" if cfg.Training.gpu_ids else "cpu")
 
-data_dir= 'dataset/BSD500/images'
+    print('===> Loading datasets')
+    train_set = get_training_set(cfg.Dataset.target_dataframe, opt.upscale_factor)
+    test_set = get_test_set(data_dir, opt.upscale_factor)
+    training_data_loader = DataLoader(dataset=train_set, num_workers=opt.threads, batch_size=opt.batchSize,
+                                      shuffle=True)
+    testing_data_loader = DataLoader(dataset=test_set, num_workers=opt.threads, batch_size=opt.testBatchSize,
+                                     shuffle=False)
 
-print('===> Loading datasets')
-train_set = get_training_set(data_dir, opt.upscale_factor)
-test_set = get_test_set(data_dir, opt.upscale_factor)
-training_data_loader = DataLoader(dataset=train_set, num_workers=opt.threads, batch_size=opt.batchSize, shuffle=True)
-testing_data_loader = DataLoader(dataset=test_set, num_workers=opt.threads, batch_size=opt.testBatchSize, shuffle=False)
+    print('===> Building model')
+    model = Net(upscale_factor=opt.upscale_factor).to(device)
+    criterion_mse = nn.MSELoss()
+    criterion = nn.L1Loss()
+    optimizer = optim.Adam(model.parameters(), lr=opt.lr)
 
-print('===> Building model')
-model = Net(upscale_factor=opt.upscale_factor).to(device)
-criterion_mse = nn.MSELoss()
-criterion = nn.L1Loss()
-
-optimizer = optim.Adam(model.parameters(), lr=opt.lr)
-
-
-def train(epoch):
     epoch_loss = 0
     for iteration, batch in enumerate(training_data_loader, 1):
         input, target = batch[0].to(device), batch[1].to(device)

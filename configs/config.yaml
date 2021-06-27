@@ -1,0 +1,87 @@
+Training:
+  n_epoch: 50
+  lr: 0.0002
+  batchSize: 12
+  reshape: 256
+  fineSize: 224
+  input_nc: 3
+  output_nc: 3
+  ngf: 64
+  ndf: 64
+  which_model_netG: 'twodecoder_unet'
+  which_model_netD: 'n_layers'
+  n_layers_D: 5
+  pool_size: 32
+  beta1: 0.9
+  norm: batch
+  no_dropout: False
+  init_type: 'normal'
+  lr_policy: 'step'
+  use_sigmoid: False
+  lr_decay_iters: 5
+  save_freq: 1
+  gpu_ids: [0]
+  isTrain: True
+  continue_train: False
+  which_epoch: 1
+  checkpoints_dir: '/home/ubuntu/stain_norm/results'
+  name: 'twodecoder_gan'
+  subcat: 'content_l1_emd'
+  input_format: 'gray'
+  mixup_p: 0.5
+  alpha: 0.5
+  shuffle: True
+  n_worker: 4
+  max_iter_size: 500
+  max_valid_dataset_size: 100
+  metric: val_loss
+  upscale_factor: 1.0
+  seed: 123
+Dataset:
+  dataset_mode: 'dual'
+  dataset_path: '/home/ubuntu/TCGA_IDH'
+  source_dataframe: '/home/ubuntu/stain_norm/data/IDH/all_source.csv'
+  target_dataframe: '/home/ubuntu/stain_norm/data/IDH/all_target.csv'
+  validation_dataframe: '/home/ubuntu/TCGA_IDH/_Valid_All.csv'
+  training_dataframe: '/home/ubuntu/TCGA_IDH/_Train_All.csv'
+  testing1_dataframe: '/home/ubuntu/TCGA_IDH/_Test_All.csv'
+  testing2_dataframe: '/home/ubuntu/TCGA_IDH/_Test_MUH.csv'
+  all_dataframe: '/home/ubuntu/TCGA_IDH/IDH_ALL.csv'
+  method: 'half'
+  augment_fn: 'simCLR'
+CycleGAN:
+  which_direction: 'AtoB'
+  identity: 0.5
+  lambda_A: 10
+  lambda_B: 10
+PixGAN:
+  lambda_l1: 0.25
+  lambda_content: 0.75
+  lambda_emd: 0.01
+TesGAN:
+  lambda_content: 10
+  pretrain: 'vgg'
+Transformer:
+  num_heads: 12
+  num_layers: 12
+  hidden_size: 768
+  num_classes: 3
+  mlp_ratio: 4
+  hydrid: 'Transformer'
+  pretrained: False
+  qk_scale: None
+  qkv_bias: False
+  drop_path: 0
+  attent_dropout_rate: 0.5
+  patches: 16
+  decoder_channels: 256,128,64,16
+  n_skip: 0
+  vis: False
+  zero_head: False
+  skip_channels: [512, 256, 64, 16]
+  D_aug_fun: translation,cutout
+Resnet:
+  num_layers: 3,4,9
+  width_factor: 1
+Util:
+  timm: '/content/drive/MyDrive/pytorch-image-models-master'

@@ -4,7 +4,7 @@ from six.moves import urllib
 import tarfile
 from torchvision.transforms import Compose, CenterCrop, ToTensor, Resize
 
-from dataset import DatasetFromFolder
+from dataset import DatasetFromFolder, DatasetFromDataframe
 
 
 def download_bsd300(dest="dataset"):
@@ -51,11 +51,14 @@ def target_transform(crop_size):
 
 
 def get_training_set(data_dir, upscale_factor):
-    root_dir = data_dir  # download_bsd300()
-    train_dir = join(root_dir, "train")
+    # root_dir = data_dir  # download_bsd300()
+    # train_dir = join(root_dir, "train")
     crop_size = calculate_valid_crop_size(256, upscale_factor)
 
-    return DatasetFromFolder(train_dir,
+    # return DatasetFromFolder(train_dir,
+    #                          input_transform=input_transform(crop_size, upscale_factor),
+    #                          target_transform=target_transform(crop_size))
+    return DatasetFromDataframe(data_dir,
                              input_transform=input_transform(crop_size, upscale_factor),
                              target_transform=target_transform(crop_size))
 
@@ -63,8 +66,8 @@ def get_training_set(data_dir, upscale_factor):
 #import os
 #import numpy as np
 def get_test_set(data_dir, upscale_factor):
-    root_dir = data_dir   # download_bsd300()
-    test_dir = join(root_dir, "test")
+    # root_dir = data_dir   # download_bsd300()
+    # test_dir = join(root_dir, "test")
     crop_size = calculate_valid_crop_size(256, upscale_factor)
     
     #my code
@@ -94,6 +97,9 @@ def get_test_set(data_dir, upscale_factor):
 #        print('target shape', target.shape)    #torch.Size([1, 255, 255])
 #        print('cb shape', cb.shape)
         
-    return DatasetFromFolder(test_dir,
+    # return DatasetFromFolder(test_dir,
+    #                          input_transform=input_transform(crop_size, upscale_factor),
+    #                          target_transform=target_transform(crop_size))
+    return DatasetFromDataframe(data_dir,
                              input_transform=input_transform(crop_size, upscale_factor),
                              target_transform=target_transform(crop_size))

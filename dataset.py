@@ -1,4 +1,5 @@
 import torch.utils.data as data
+import pandas as pd
 
 from os import listdir
 from os.path import join
@@ -35,3 +36,24 @@ class DatasetFromFolder(data.Dataset):
 
     def __len__(self):
         return len(self.image_filenames)
+
+class DatasetFromDataframe(data.Dataset):
+    def __init__(self, image_df, input_transform=None, target_transform=None):
+        super(DatasetFromDataframe, self).__init__()
+        self.image_df = pd.read_csv(image_df)
+
+        self.input_transform = input_transform
+        self.target_transform = target_transform
+
+    def __getitem__(self, index):
+        _input = load_img(self.image_df.iloc[index, 0])
+        target = _input.copy()
+        if self.input_transform:
+            _input = self.input_transform(_input)
+        if self.target_transform:
+            target = self.target_transform(target)
+
+        return _input, target
+
+    def __len__(self):
+        return len(self.image_df)
